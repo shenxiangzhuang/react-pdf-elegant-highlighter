@@ -25,6 +25,7 @@ export function Highlight({
   isScrolledTo,
 }: Props) {
   const { rects, boundingRect } = position;
+  const customColor = !isScrolledTo ? comment?.color : undefined;
 
   return (
     <div
@@ -49,7 +50,7 @@ export function Highlight({
             onClick={onClick}
             // biome-ignore lint/suspicious/noArrayIndexKey: We can use position hash at some point in future
             key={index}
-            style={rect}
+            style={{ ...rect, backgroundColor: customColor || undefined }}
             className={`Highlight__part ${styles.part}`}
           />
         ))}

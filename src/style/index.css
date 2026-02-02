@@ -2,12 +2,85 @@
 @import "./pdf_viewer.css";
 
 .Highlight__popup {
-  background-color: #3d464d;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 3px;
-  max-width: 300px;
-  max-height: 100px;
-  overflow-y: scroll;
+  background: linear-gradient(135deg, #ffffff 0%, #f6f1e7 100%);
+  border: 1px solid #e2d6c5;
+  color: #2d2a26;
+  padding: 10px 12px;
+  border-radius: 10px;
+  max-width: 320px;
+  box-shadow: 0 10px 20px rgba(35, 33, 30, 0.15);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.Highlight__popupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.Highlight__popupTitle {
+  font-weight: 600;
+  font-size: 12px;
+  color: #7b6d5f;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.Highlight__popupActions {
+  display: flex;
+  gap: 6px;
+}
+
+.Highlight__popupButton {
+  border: 1px solid #d7c9b7;
+  background: #fff8ee;
+  color: #5b4d3f;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.Highlight__popupButton--primary {
+  background: #8a0f1a;
+  border-color: #8a0f1a;
+  color: #fff;
+}
+
+.Highlight__popupButton--danger {
+  background: #3d2f2f;
+  border-color: #3d2f2f;
+  color: #fff;
+}
+
+.Highlight__popupBody {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2f2a24;
+}
+
+.Highlight__popupEmoji {
+  font-size: 16px;
+}
+
+.Highlight__popupEditor textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid #e2d6c5;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  resize: vertical;
+  color: #2d2a26;
+  background: #fffdfa;
+}
+
+.Highlight__popupEditorActions {
+  margin-top: 6px;
+  display: flex;
+  justify-content: flex-end;
 }

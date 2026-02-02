@@ -15,14 +15,17 @@ export function AreaHighlight({
   isScrolledTo,
   ...otherProps
 }: Props) {
+  const customColor = !isScrolledTo ? highlight.comment?.color : undefined;
   return (
     <div
       className={`${styles.areaHighlight} ${
         isScrolledTo ? styles.scrolledTo : ""
       }`}
+      style={{ backgroundColor: customColor || undefined }}
     >
       <Rnd
         className={styles.part}
+        style={{ backgroundColor: customColor || undefined }}
         onDragStop={(_, data) => {
           const boundingRect: LTWHP = {
             ...highlight.position.boundingRect,

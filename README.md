@@ -1,43 +1,80 @@
-☕️ [Buy me a coffee](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SC4D2NS8G2JJ8&source=url)
-
-![Node CI](https://github.com/agentcooper/react-pdf-highlighter/workflows/Node%20CI/badge.svg)
-
-# react-pdf-highlighter
+# react-pdf-elegant-highlighter
 
 Set of React components for PDF annotation.
 
 Features:
 
 - Built on top of PDF.js
-- Text and image highlights
+- Text and area highlights
 - Popover text for highlights
 - Scroll to highlights
+- React 19 compatible
 
 ## Importing CSS
 
 The bundled CSS include the CSS for pdfjs.
 
 ```tsx
-import "react-pdf-highlighter/dist/style.css";
+import "react-pdf-elegant-highlighter/dist/style.css";
 ```
 
 ## Example
 
-See demo https://agentcooper.github.io/react-pdf-highlighter/.
+See demo https://shenxiangzhuang.github.io/react-pdf-elegant-highlighter/.
 
 To run the example app locally:
 
 ```bash
-npm install
-npm start
+pnpm install
+pnpm start
 ```
 
 ## Install
 
 ```bash
-npm install react-pdf-highlighter
+pnpm add react-pdf-elegant-highlighter
 ```
 
 ## How to use
 
-See [`./example/src/App.tsx`](https://github.com/agentcooper/react-pdf-highlighter/blob/main/example/src/App.tsx) for the React component API example.
+See [`./example/src/App.tsx`](https://github.com/shenxiangzhuang/react-pdf-elegant-highlighter/blob/main/example/src/App.tsx) for the React component API example.
+
+## Persistence
+
+Use `PersistentPdfHighlighter` with a store created by `createLocalStorageStore`.
+
+```tsx
+import {
+  PersistentPdfHighlighter,
+  createLocalStorageStore,
+  Tip,
+} from "react-pdf-elegant-highlighter";
+
+const store = createLocalStorageStore("pdf-highlights:doc-1");
+
+<PersistentPdfHighlighter
+  pdfDocument={pdfDocument}
+  persistence={store}
+  onSelectionFinished={(
+    position,
+    content,
+    hideTip,
+    transform,
+    setSelectionColor,
+    helpers,
+  ) => (
+    <Tip
+      onOpen={transform}
+      onColorChange={setSelectionColor}
+      onConfirm={(comment) => {
+        helpers.addHighlight({ content, position, comment });
+        hideTip();
+      }}
+    />
+  )}
+  highlightTransform={highlightTransform}
+  onScrollChange={resetHash}
+  scrollRef={scrollRef}
+  enableAreaSelection={(event) => event.altKey}
+/>;
+```

@@ -20,8 +20,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3003/react-pdf-highlighter/",
+    command: "pnpm run dev",
+    url: "http://localhost:3003/react-pdf-elegant-highlighter/",
     reuseExistingServer: !process.env.CI,
   },
 });
