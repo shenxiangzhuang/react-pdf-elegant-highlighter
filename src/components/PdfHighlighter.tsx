@@ -111,6 +111,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     [page: number]: { reactRoot: Root; container: Element };
   } = {};
   unsubscribe = () => {};
+  private isPointerDown = false;
 
   constructor(props: PdfHighlighterProps<T_HT>) {
     super(props);
@@ -478,8 +479,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       isCollapsed: false,
       range,
     });
-
-    this.debouncedAfterSelection();
+    if (!this.isPointerDown && !this.state.isAreaSelectionInProgress) {
+      this.debouncedAfterSelection();
+    }
   };
 
   onScroll = () => {
@@ -502,11 +504,21 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       return;
     }
 
+    this.isPointerDown = true;
     if (event.target.closest("#PdfHighlighter__tip-container")) {
       return;
     }
 
     this.hideTipAndSelection();
+  };
+
+  onMouseUp: PointerEventHandler = () => {
+    this.isPointerDown = false;
+    const { isCollapsed, range, isAreaSelectionInProgress } = this.state;
+    if (!range || isCollapsed || isAreaSelectionInProgress) {
+      return;
+    }
+    this.debouncedAfterSelection();
   };
 
   handleKeyDown = (event: KeyboardEvent) => {
@@ -591,7 +603,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     const { onSelectionFinished, enableAreaSelection } = this.props;
 
     return (
-      <div onPointerDown={this.onMouseDown}>
+      <div onPointerDown={this.onMouseDown} onPointerUp={this.onMouseUp}>
         <div
           ref={this.containerNodeRef}
           className={styles.container}

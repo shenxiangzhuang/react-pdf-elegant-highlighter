@@ -42,40 +42,57 @@ function HighlightPopup({
   comment,
   onEdit,
   onDelete,
+  onRequestLock,
+  onRequestUnlock,
+  isLocked,
 }: {
   comment: { text: string; emoji: string };
   onEdit: (nextText: string) => void;
   onDelete: () => void;
+  onRequestLock?: () => void;
+  onRequestUnlock?: () => void;
+  isLocked?: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(comment.text);
+  const active = Boolean(isLocked);
 
   useEffect(() => {
     setDraft(comment.text);
   }, [comment.text]);
 
   return (
-    <div className="Highlight__popup">
+    <div
+      className="Highlight__popup"
+      onClick={(event) => {
+        event.stopPropagation();
+        if (!active && onRequestLock) {
+          onRequestLock();
+        }
+      }}
+    >
       <div className="Highlight__popupHeader">
         <span className="Highlight__popupTitle">Note</span>
-        <div className="Highlight__popupActions">
-          <button
-            type="button"
-            className="Highlight__popupButton"
-            onClick={() => setIsEditing((prev) => !prev)}
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </button>
-          <button
-            type="button"
-            className="Highlight__popupButton Highlight__popupButton--danger"
-            onClick={onDelete}
-          >
-            Delete
-          </button>
-        </div>
+        {active ? (
+          <div className="Highlight__popupActions">
+            <button
+              type="button"
+              className="Highlight__popupButton"
+              onClick={() => setIsEditing((prev) => !prev)}
+            >
+              {isEditing ? "Cancel" : "Edit"}
+            </button>
+            <button
+              type="button"
+              className="Highlight__popupButton Highlight__popupButton--danger"
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+          </div>
+        ) : null}
       </div>
-      {isEditing ? (
+      {active && isEditing ? (
         <div className="Highlight__popupEditor">
           <textarea
             value={draft}
@@ -89,6 +106,9 @@ function HighlightPopup({
               onClick={() => {
                 onEdit(draft);
                 setIsEditing(false);
+                if (onRequestUnlock) {
+                  onRequestUnlock();
+                }
               }}
             >
               Save
@@ -98,7 +118,7 @@ function HighlightPopup({
       ) : (
         <div className="Highlight__popupBody">
           <span className="Highlight__popupEmoji">{comment.emoji}</span>
-          <span>{comment.text || "No note yet."}</span>
+          <span>{comment.text}</span>
         </div>
       )}
     </div>
@@ -107,6 +127,7 @@ function HighlightPopup({
 
 const PRIMARY_PDF_URL = "https://arxiv.org/pdf/1708.08021";
 const SECONDARY_PDF_URL = "https://arxiv.org/pdf/1604.02480";
+const OPEN_NOTE_ON_SELECTION = true;
 
 export function App() {
   const searchParams = new URLSearchParams(document.location.search);
@@ -216,6 +237,7 @@ export function App() {
                 <Tip
                   onOpen={transformSelection}
                   onColorChange={setSelectionColor}
+                  openOnSelection={OPEN_NOTE_ON_SELECTION}
                   onConfirm={(comment) => {
                     helpers.addHighlight({ content, position, comment });
                     hideTipAndSelection();
@@ -232,6 +254,7 @@ export function App() {
                 isScrolledTo,
               ) => {
                 const isTextHighlight = !highlight.content?.image;
+                const hasNote = Boolean(highlight.comment?.text);
 
                 const component = isTextHighlight ? (
                   <Highlight
@@ -250,8 +273,12 @@ export function App() {
                         { image: screenshot(boundingRect) },
                       );
                     }}
-                  />
+                    />
                 );
+
+                if (!hasNote) {
+                  return component;
+                }
 
                 return (
                   <Popup

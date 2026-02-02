@@ -13,6 +13,7 @@ interface Props {
   onOpen: () => void;
   onUpdate?: () => void;
   onColorChange?: (color: string) => void;
+  openOnSelection?: boolean;
 }
 
 export class Tip extends Component<Props, State> {
@@ -23,13 +24,38 @@ export class Tip extends Component<Props, State> {
     color: "#f6d365",
   };
 
+  componentDidMount() {
+    if (this.props.openOnSelection) {
+      this.openEditor();
+    }
+  }
+
   // for TipContainer
-  componentDidUpdate(_: Props, nextState: State) {
-    const { onUpdate } = this.props;
+  componentDidUpdate(prevProps: Props, nextState: State) {
+    const { onUpdate, openOnSelection } = this.props;
 
     if (onUpdate && this.state.compact !== nextState.compact) {
       onUpdate();
     }
+
+    if (!prevProps.openOnSelection && openOnSelection) {
+      this.openEditor();
+    }
+  }
+
+  openEditor() {
+    const { onOpen, onColorChange } = this.props;
+    const { color, compact } = this.state;
+
+    if (!compact) {
+      return;
+    }
+
+    onOpen();
+    if (onColorChange) {
+      onColorChange(color);
+    }
+    this.setState({ compact: false });
   }
 
   render() {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { MouseMonitor } from "./MouseMonitor";
 
 interface Props {
@@ -15,28 +15,53 @@ export function Popup({
   children,
 }: Props) {
   const [mouseIn, setMouseIn] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+
+  const popupWithControls = useMemo(() => {
+    if (!React.isValidElement(popupContent)) {
+      return popupContent;
+    }
+    return React.cloneElement(popupContent, {
+      onRequestLock: () => setIsLocked(true),
+      onRequestUnlock: () => setIsLocked(false),
+      isLocked,
+    });
+  }, [popupContent, isLocked]);
+
+  const contentWithLock = useMemo(() => {
+    if (!popupWithControls) {
+      return popupWithControls;
+    }
+    return (
+      <MouseMonitor
+        onMoveAway={() => {
+          if (mouseIn || isLocked) {
+            return;
+          }
+          onMouseOut();
+        }}
+        paddingX={60}
+        paddingY={30}
+      >
+        {popupWithControls}
+      </MouseMonitor>
+    );
+  }, [popupWithControls, mouseIn, isLocked, onMouseOut]);
 
   return (
     <div
       onMouseOver={() => {
+        if (isLocked) {
+          onMouseOver(contentWithLock);
+          return;
+        }
         setMouseIn(true);
-        onMouseOver(
-          <MouseMonitor
-            onMoveAway={() => {
-              if (mouseIn) {
-                return;
-              }
-
-              onMouseOut();
-            }}
-            paddingX={60}
-            paddingY={30}
-          >
-            {popupContent}
-          </MouseMonitor>,
-        );
+        onMouseOver(contentWithLock);
       }}
       onMouseOut={() => {
+        if (isLocked) {
+          return;
+        }
         setMouseIn(false);
       }}
     >

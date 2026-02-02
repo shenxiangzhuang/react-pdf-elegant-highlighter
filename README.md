@@ -65,6 +65,7 @@ const store = createLocalStorageStore("pdf-highlights:doc-1");
   ) => (
     <Tip
       onOpen={transform}
+      openOnSelection
       onColorChange={setSelectionColor}
       onConfirm={(comment) => {
         helpers.addHighlight({ content, position, comment });
