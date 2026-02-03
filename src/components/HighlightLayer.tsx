@@ -1,4 +1,5 @@
 import type { PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
+import type { ReactElement } from "react";
 import { viewportToScaled } from "../lib/coordinates";
 import type {
   IHighlight,
@@ -19,25 +20,28 @@ interface HighlightLayerProps<T_HT> {
     index: number,
     setTip: (
       highlight: T_ViewportHighlight<T_HT>,
-      callback: (highlight: T_ViewportHighlight<T_HT>) => JSX.Element,
+      callback: (highlight: T_ViewportHighlight<T_HT>) => ReactElement,
     ) => void,
     hideTip: () => void,
     viewportToScaled: (rect: LTWHP) => Scaled,
     screenshot: (position: LTWH) => string,
     isScrolledTo: boolean,
-  ) => JSX.Element;
+  ) => ReactElement;
   tip: {
     highlight: T_ViewportHighlight<T_HT>;
-    callback: (highlight: T_ViewportHighlight<T_HT>) => JSX.Element;
+    callback: (highlight: T_ViewportHighlight<T_HT>) => ReactElement;
   } | null;
   scaledPositionToViewport: (scaledPosition: ScaledPosition) => Position;
   hideTipAndSelection: () => void;
   viewer: PDFViewer;
   screenshot: (position: LTWH, pageNumber: number) => string;
-  showTip: (highlight: T_ViewportHighlight<T_HT>, content: JSX.Element) => void;
+  showTip: (
+    highlight: T_ViewportHighlight<T_HT>,
+    content: ReactElement,
+  ) => void;
   setTip: (state: {
     highlight: T_ViewportHighlight<T_HT>;
-    callback: (highlight: T_ViewportHighlight<T_HT>) => JSX.Element;
+    callback: (highlight: T_ViewportHighlight<T_HT>) => ReactElement;
   }) => void;
 }
 
@@ -79,13 +83,13 @@ export function HighlightLayer<T_HT extends IHighlight>({
           hideTipAndSelection,
           (rect) => {
             const viewport = viewer.getPageView(
-              (rect.pageNumber || Number.parseInt(pageNumber)) - 1,
+              (rect.pageNumber || Number.parseInt(pageNumber, 10)) - 1,
             ).viewport;
 
             return viewportToScaled(rect, viewport);
           },
           (boundingRect) =>
-            screenshot(boundingRect, Number.parseInt(pageNumber)),
+            screenshot(boundingRect, Number.parseInt(pageNumber, 10)),
           isScrolledTo,
         );
       })}

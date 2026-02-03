@@ -1,30 +1,28 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-
-import {
-  AreaHighlight,
-  Highlight,
-  PdfHighlighter,
-  PdfLoader,
-  Popup,
-  Tip,
-} from "./react-pdf-highlighter";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Content,
+  HighlightHelpers,
   IHighlight,
-  NewHighlight,
   ScaledPosition,
-} from "./react-pdf-highlighter";
+} from "./react-pdf-elegant-highlighter";
+import {
+  AreaHighlight,
+  createLocalStorageStore,
+  Highlight,
+  PdfLoader,
+  PersistentPdfHighlighter,
+  Popup,
+  Tip,
+} from "./react-pdf-elegant-highlighter";
 
 import { Sidebar } from "./Sidebar";
 import { Spinner } from "./Spinner";
 import { testHighlights as _testHighlights } from "./test-highlights";
 
 import "./style/App.css";
-import "../../dist/style.css";
+import "../../src/style/index.css";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
-
-const getNextId = () => String(Math.random()).slice(2);
 
 const parseIdFromHash = () =>
   document.location.hash.slice("#highlight-".length);
@@ -33,48 +31,155 @@ const resetHash = () => {
   document.location.hash = "";
 };
 
-const HighlightPopup = ({
+function HighlightPopup({
   comment,
+  onEdit,
+  onDelete,
+  onRequestLock,
+  onRequestUnlock,
+  isLocked,
 }: {
   comment: { text: string; emoji: string };
-}) =>
-  comment.text ? (
-    <div className="Highlight__popup">
-      {comment.emoji} {comment.text}
+  onEdit: (nextText: string) => void;
+  onDelete: () => void;
+  onRequestLock?: () => void;
+  onRequestUnlock?: () => void;
+  isLocked?: boolean;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(comment.text);
+  const active = Boolean(isLocked);
+
+  useEffect(() => {
+    setDraft(comment.text);
+  }, [comment.text]);
+
+  const handleActivate = () => {
+    if (!active && onRequestLock) {
+      onRequestLock();
+    }
+  };
+
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: Container has nested buttons.
+    <div
+      className="Highlight__popup"
+      onClick={(event) => {
+        event.stopPropagation();
+        handleActivate();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleActivate();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
+      <div className="Highlight__popupHeader">
+        <span className="Highlight__popupTitle">Note</span>
+        {active ? (
+          <div className="Highlight__popupActions">
+            <button
+              type="button"
+              className="Highlight__popupButton"
+              onClick={() => setIsEditing((prev) => !prev)}
+            >
+              {isEditing ? "Cancel" : "Edit"}
+            </button>
+            <button
+              type="button"
+              className="Highlight__popupButton Highlight__popupButton--danger"
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+          </div>
+        ) : null}
+      </div>
+      {active && isEditing ? (
+        <div className="Highlight__popupEditor">
+          <textarea
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Edit note..."
+          />
+          <div className="Highlight__popupEditorActions">
+            <button
+              type="button"
+              className="Highlight__popupButton Highlight__popupButton--primary"
+              onClick={() => {
+                onEdit(draft);
+                setIsEditing(false);
+                if (onRequestUnlock) {
+                  onRequestUnlock();
+                }
+              }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="Highlight__popupBody">
+          <span className="Highlight__popupEmoji">{comment.emoji}</span>
+          <span>{comment.text}</span>
+        </div>
+      )}
     </div>
-  ) : null;
+  );
+}
 
 const PRIMARY_PDF_URL = "https://arxiv.org/pdf/1708.08021";
 const SECONDARY_PDF_URL = "https://arxiv.org/pdf/1604.02480";
+const OPEN_NOTE_ON_SELECTION = true;
 
 export function App() {
   const searchParams = new URLSearchParams(document.location.search);
   const initialUrl = searchParams.get("url") || PRIMARY_PDF_URL;
 
   const [url, setUrl] = useState(initialUrl);
-  const [highlights, setHighlights] = useState<Array<IHighlight>>(
-    testHighlights[initialUrl] ? [...testHighlights[initialUrl]] : [],
+  const [highlights, setHighlights] = useState<Array<IHighlight>>([]);
+  const helpersRef = useRef<HighlightHelpers<IHighlight> | null>(null);
+
+  const highlightStore = useMemo(
+    () => createLocalStorageStore<IHighlight>(`pdf-highlights:${url}`),
+    [url],
+  );
+
+  const initialHighlights = useMemo(
+    () => (testHighlights[url] ? [...testHighlights[url]] : []),
+    [url],
   );
 
   const resetHighlights = () => {
-    setHighlights([]);
+    highlightStore.clear?.();
+    helpersRef.current?.setHighlights([]);
   };
 
   const toggleDocument = () => {
     const newUrl =
       url === PRIMARY_PDF_URL ? SECONDARY_PDF_URL : PRIMARY_PDF_URL;
     setUrl(newUrl);
-    setHighlights(testHighlights[newUrl] ? [...testHighlights[newUrl]] : []);
+    setHighlights([]);
   };
 
-  const scrollViewerTo = useRef((highlight: IHighlight) => {});
+  const scrollViewerTo = useRef((_highlight: IHighlight) => {});
+
+  const getHighlightById = useCallback(
+    (id: string) => {
+      return highlights.find((highlight) => highlight.id === id);
+    },
+    [highlights],
+  );
 
   const scrollToHighlightFromHash = useCallback(() => {
     const highlight = getHighlightById(parseIdFromHash());
     if (highlight) {
       scrollViewerTo.current(highlight);
     }
-  }, []);
+  }, [getHighlightById]);
 
   useEffect(() => {
     window.addEventListener("hashchange", scrollToHighlightFromHash, false);
@@ -87,42 +192,16 @@ export function App() {
     };
   }, [scrollToHighlightFromHash]);
 
-  const getHighlightById = (id: string) => {
-    return highlights.find((highlight) => highlight.id === id);
-  };
-
-  const addHighlight = (highlight: NewHighlight) => {
-    console.log("Saving highlight", highlight);
-    setHighlights((prevHighlights) => [
-      { ...highlight, id: getNextId() },
-      ...prevHighlights,
-    ]);
-  };
-
   const updateHighlight = (
     highlightId: string,
     position: Partial<ScaledPosition>,
     content: Partial<Content>,
   ) => {
-    console.log("Updating highlight", highlightId, position, content);
-    setHighlights((prevHighlights) =>
-      prevHighlights.map((h) => {
-        const {
-          id,
-          position: originalPosition,
-          content: originalContent,
-          ...rest
-        } = h;
-        return id === highlightId
-          ? {
-              id,
-              position: { ...originalPosition, ...position },
-              content: { ...originalContent, ...content },
-              ...rest,
-            }
-          : h;
-      }),
-    );
+    helpersRef.current?.updateHighlight(highlightId, position, content);
+  };
+
+  const updateHighlightComment = (highlightId: string, text: string) => {
+    helpersRef.current?.updateHighlightComment(highlightId, { text });
   };
 
   return (
@@ -141,10 +220,14 @@ export function App() {
       >
         <PdfLoader url={url} beforeLoad={<Spinner />}>
           {(pdfDocument) => (
-            <PdfHighlighter
+            <PersistentPdfHighlighter
               pdfDocument={pdfDocument}
               enableAreaSelection={(event) => event.altKey}
               onScrollChange={resetHash}
+              apiRef={helpersRef}
+              persistence={highlightStore}
+              initialHighlights={initialHighlights}
+              onHighlightsChange={setHighlights}
               scrollRef={(scrollTo) => {
                 scrollViewerTo.current = scrollTo;
                 scrollToHighlightFromHash();
@@ -154,11 +237,15 @@ export function App() {
                 content,
                 hideTipAndSelection,
                 transformSelection,
+                setSelectionColor,
+                helpers,
               ) => (
                 <Tip
                   onOpen={transformSelection}
+                  onColorChange={setSelectionColor}
+                  openOnSelection={OPEN_NOTE_ON_SELECTION}
                   onConfirm={(comment) => {
-                    addHighlight({ content, position, comment });
+                    helpers.addHighlight({ content, position, comment });
                     hideTipAndSelection();
                   }}
                 />
@@ -173,6 +260,7 @@ export function App() {
                 isScrolledTo,
               ) => {
                 const isTextHighlight = !highlight.content?.image;
+                const hasNote = Boolean(highlight.comment?.text);
 
                 const component = isTextHighlight ? (
                   <Highlight
@@ -194,11 +282,27 @@ export function App() {
                   />
                 );
 
+                if (!hasNote) {
+                  return component;
+                }
+
                 return (
                   <Popup
-                    popupContent={<HighlightPopup {...highlight} />}
+                    popupContent={
+                      <HighlightPopup
+                        comment={highlight.comment}
+                        onEdit={(nextText) => {
+                          updateHighlightComment(highlight.id, nextText);
+                          hideTip();
+                        }}
+                        onDelete={() => {
+                          helpersRef.current?.removeHighlight(highlight.id);
+                          hideTip();
+                        }}
+                      />
+                    }
                     onMouseOver={(popupContent) =>
-                      setTip(highlight, (highlight) => popupContent)
+                      setTip(highlight, (_highlight) => popupContent)
                     }
                     onMouseOut={hideTip}
                     key={index}
@@ -207,7 +311,6 @@ export function App() {
                   </Popup>
                 );
               }}
-              highlights={highlights}
             />
           )}
         </PdfLoader>

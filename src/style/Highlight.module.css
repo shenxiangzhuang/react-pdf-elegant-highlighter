@@ -14,9 +14,11 @@
 }
 
 .part {
+  border: none;
   cursor: pointer;
   position: absolute;
   background: rgba(255, 226, 143, 1);
+  padding: 0;
   transition: background 0.3s;
 }
 

@@ -1,5 +1,5 @@
 import styles from "../style/Highlight.module.css";
-import type { LTWHP } from "../types.js";
+import type { Comment, LTWHP } from "../types.js";
 
 interface Props {
   position: {
@@ -9,10 +9,7 @@ interface Props {
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
-  comment: {
-    emoji: string;
-    text: string;
-  };
+  comment: Comment;
   isScrolledTo: boolean;
 }
 
@@ -25,6 +22,7 @@ export function Highlight({
   isScrolledTo,
 }: Props) {
   const { rects, boundingRect } = position;
+  const customColor = !isScrolledTo ? comment?.color : undefined;
 
   return (
     <div
@@ -43,13 +41,23 @@ export function Highlight({
       ) : null}
       <div className={`Highlight__parts ${styles.parts}`}>
         {rects.map((rect, index) => (
-          <div
+          <button
+            type="button"
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
             onClick={onClick}
+            onKeyDown={(event) => {
+              if (!onClick) {
+                return;
+              }
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }}
             // biome-ignore lint/suspicious/noArrayIndexKey: We can use position hash at some point in future
             key={index}
-            style={rect}
+            style={{ ...rect, backgroundColor: customColor || undefined }}
             className={`Highlight__part ${styles.part}`}
           />
         ))}

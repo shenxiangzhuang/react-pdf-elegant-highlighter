@@ -1,4 +1,4 @@
-import type { IHighlight } from "./react-pdf-highlighter";
+import type { IHighlight } from "./react-pdf-elegant-highlighter";
 
 interface Props {
   highlights: Array<IHighlight>;
@@ -21,11 +21,11 @@ export function Sidebar({
     <div className="sidebar" style={{ width: "25vw" }}>
       <div className="description" style={{ padding: "1rem" }}>
         <h2 style={{ marginBottom: "1rem" }}>
-          react-pdf-highlighter {APP_VERSION}
+          react-pdf-elegant-highlighter {APP_VERSION}
         </h2>
 
         <p style={{ fontSize: "0.7rem" }}>
-          <a href="https://github.com/agentcooper/react-pdf-highlighter">
+          <a href="https://github.com/shenxiangzhuang/react-pdf-elegant-highlighter">
             Open in GitHub
           </a>
         </p>
