@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { HighlightStore } from "../persistence";
 import type {
   Comment,
   Content,
@@ -6,11 +8,7 @@ import type {
   NewHighlight,
   ScaledPosition,
 } from "../types";
-import type { HighlightStore } from "../persistence";
-import {
-  PdfHighlighter,
-  type PdfHighlighterProps,
-} from "./PdfHighlighter";
+import { PdfHighlighter, type PdfHighlighterProps } from "./PdfHighlighter";
 
 export interface HighlightHelpers<T_HT extends IHighlight> {
   addHighlight: (highlight: NewHighlight) => T_HT;
@@ -28,7 +26,10 @@ export interface HighlightHelpers<T_HT extends IHighlight> {
 }
 
 export interface PersistentPdfHighlighterProps<T_HT extends IHighlight>
-  extends Omit<PdfHighlighterProps<T_HT>, "highlights" | "onSelectionFinished"> {
+  extends Omit<
+    PdfHighlighterProps<T_HT>,
+    "highlights" | "onSelectionFinished"
+  > {
   persistence: HighlightStore<T_HT>;
   initialHighlights?: Array<T_HT>;
   onSelectionFinished: (
@@ -191,13 +192,16 @@ export function PersistentPdfHighlighter<T_HT extends IHighlight>({
     [],
   );
 
-  const helpers: HighlightHelpers<T_HT> = {
-    addHighlight,
-    updateHighlight,
-    updateHighlightComment,
-    removeHighlight,
-    setHighlights,
-  };
+  const helpers: HighlightHelpers<T_HT> = useMemo(
+    () => ({
+      addHighlight,
+      updateHighlight,
+      updateHighlightComment,
+      removeHighlight,
+      setHighlights,
+    }),
+    [addHighlight, updateHighlight, updateHighlightComment, removeHighlight],
+  );
 
   useEffect(() => {
     if (apiRef) {

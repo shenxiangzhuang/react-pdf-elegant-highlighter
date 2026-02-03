@@ -54,22 +54,31 @@ export function Popup({
     );
   }, [popupWithControls, mouseIn, isLocked, onMouseOut]);
 
+  const handleShow = () => {
+    if (isLocked) {
+      onMouseOver(contentWithLock);
+      return;
+    }
+    setMouseIn(true);
+    onMouseOver(contentWithLock);
+  };
+
+  const handleHide = () => {
+    if (isLocked) {
+      return;
+    }
+    setMouseIn(false);
+  };
+
   return (
+    // biome-ignore lint/a11y/useSemanticElements: Wrapper manages hover/focus behavior for popup content.
     <div
-      onMouseOver={() => {
-        if (isLocked) {
-          onMouseOver(contentWithLock);
-          return;
-        }
-        setMouseIn(true);
-        onMouseOver(contentWithLock);
-      }}
-      onMouseOut={() => {
-        if (isLocked) {
-          return;
-        }
-        setMouseIn(false);
-      }}
+      onMouseOver={handleShow}
+      onMouseOut={handleHide}
+      onFocus={handleShow}
+      onBlur={handleHide}
+      role="button"
+      tabIndex={0}
     >
       {children}
     </div>

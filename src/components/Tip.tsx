@@ -75,7 +75,8 @@ export class Tip extends Component<Props, State> {
     return (
       <div>
         {compact ? (
-          <div
+          <button
+            type="button"
             className={styles.compact}
             onClick={() => {
               onOpen();
@@ -86,7 +87,7 @@ export class Tip extends Component<Props, State> {
             }}
           >
             Highlight
-          </div>
+          </button>
         ) : (
           <form
             className={styles.card}

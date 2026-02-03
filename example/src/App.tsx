@@ -1,25 +1,18 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
-
-import {
-  AreaHighlight,
-  Highlight,
-  PersistentPdfHighlighter,
-  PdfLoader,
-  Popup,
-  Tip,
-  createLocalStorageStore,
-} from "./react-pdf-elegant-highlighter";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Content,
   HighlightHelpers,
   IHighlight,
   ScaledPosition,
+} from "./react-pdf-elegant-highlighter";
+import {
+  AreaHighlight,
+  createLocalStorageStore,
+  Highlight,
+  PdfLoader,
+  PersistentPdfHighlighter,
+  Popup,
+  Tip,
 } from "./react-pdf-elegant-highlighter";
 
 import { Sidebar } from "./Sidebar";
@@ -61,15 +54,28 @@ function HighlightPopup({
     setDraft(comment.text);
   }, [comment.text]);
 
+  const handleActivate = () => {
+    if (!active && onRequestLock) {
+      onRequestLock();
+    }
+  };
+
   return (
+    // biome-ignore lint/a11y/useSemanticElements: Container has nested buttons.
     <div
       className="Highlight__popup"
       onClick={(event) => {
         event.stopPropagation();
-        if (!active && onRequestLock) {
-          onRequestLock();
+        handleActivate();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleActivate();
         }
       }}
+      role="button"
+      tabIndex={0}
     >
       <div className="Highlight__popupHeader">
         <span className="Highlight__popupTitle">Note</span>
@@ -159,7 +165,7 @@ export function App() {
     setHighlights([]);
   };
 
-  const scrollViewerTo = useRef((highlight: IHighlight) => {});
+  const scrollViewerTo = useRef((_highlight: IHighlight) => {});
 
   const getHighlightById = useCallback(
     (id: string) => {
@@ -273,7 +279,7 @@ export function App() {
                         { image: screenshot(boundingRect) },
                       );
                     }}
-                    />
+                  />
                 );
 
                 if (!hasNote) {
@@ -296,7 +302,7 @@ export function App() {
                       />
                     }
                     onMouseOver={(popupContent) =>
-                      setTip(highlight, (highlight) => popupContent)
+                      setTip(highlight, (_highlight) => popupContent)
                     }
                     onMouseOut={hideTip}
                     key={index}

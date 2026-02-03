@@ -50,7 +50,7 @@ export function TipContainer({
         window.cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [children, updatePosition]);
+  }, [updatePosition]);
 
   const isStyleCalculationInProgress = width === 0 && height === 0;
 

@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
       entry: "./src/index.ts",
       formats: ["es"],
-      fileName: (format, entryName) => `${entryName}.js`,
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
       output: {

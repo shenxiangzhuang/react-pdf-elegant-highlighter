@@ -6,7 +6,7 @@ import React, {
   PureComponent,
   type RefObject,
 } from "react";
-import { type Root, createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { debounce } from "ts-debounce";
 import { scaledToViewport, viewportToScaled } from "../lib/coordinates";
 import { getAreaAsPNG } from "../lib/get-area-as-png";
@@ -604,10 +604,12 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     return (
       <div onPointerDown={this.onMouseDown} onPointerUp={this.onMouseUp}>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: Container prevents default context menu. */}
         <div
           ref={this.containerNodeRef}
           className={styles.container}
           onContextMenu={(e) => e.preventDefault()}
+          role="presentation"
         >
           <div className="pdfViewer" />
           {this.renderTip()}

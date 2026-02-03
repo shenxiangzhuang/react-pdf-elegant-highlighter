@@ -41,10 +41,20 @@ export function Highlight({
       ) : null}
       <div className={`Highlight__parts ${styles.parts}`}>
         {rects.map((rect, index) => (
-          <div
+          <button
+            type="button"
             onMouseOver={onMouseOver}
             onMouseOut={onMouseOut}
             onClick={onClick}
+            onKeyDown={(event) => {
+              if (!onClick) {
+                return;
+              }
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }}
             // biome-ignore lint/suspicious/noArrayIndexKey: We can use position hash at some point in future
             key={index}
             style={{ ...rect, backgroundColor: customColor || undefined }}

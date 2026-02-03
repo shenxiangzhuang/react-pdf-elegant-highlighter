@@ -83,13 +83,13 @@ export function HighlightLayer<T_HT extends IHighlight>({
           hideTipAndSelection,
           (rect) => {
             const viewport = viewer.getPageView(
-              (rect.pageNumber || Number.parseInt(pageNumber)) - 1,
+              (rect.pageNumber || Number.parseInt(pageNumber, 10)) - 1,
             ).viewport;
 
             return viewportToScaled(rect, viewport);
           },
           (boundingRect) =>
-            screenshot(boundingRect, Number.parseInt(pageNumber)),
+            screenshot(boundingRect, Number.parseInt(pageNumber, 10)),
           isScrolledTo,
         );
       })}
