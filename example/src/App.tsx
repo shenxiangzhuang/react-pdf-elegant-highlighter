@@ -20,7 +20,7 @@ import { Spinner } from "./Spinner";
 import { testHighlights as _testHighlights } from "./test-highlights";
 
 import "./style/App.css";
-import "../../dist/react-pdf-elegant-highlighter.css";
+import "../../src/style/index.css";
 
 const testHighlights: Record<string, Array<IHighlight>> = _testHighlights;
 

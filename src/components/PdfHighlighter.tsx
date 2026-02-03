@@ -118,7 +118,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     if (typeof ResizeObserver !== "undefined") {
       this.resizeObserver = new ResizeObserver(this.debouncedScaleValue);
     }
-    this.containerNodeRef = React.createRef();
+    this.containerNodeRef = React.createRef<HTMLDivElement>();
   }
 
   componentDidMount() {
@@ -606,7 +606,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       <div onPointerDown={this.onMouseDown} onPointerUp={this.onMouseUp}>
         {/* biome-ignore lint/a11y/noStaticElementInteractions: Container prevents default context menu. */}
         <div
-          ref={this.containerNodeRef}
+          ref={this.containerNodeRef as React.RefObject<HTMLDivElement>}
           className={styles.container}
           onContextMenu={(e) => e.preventDefault()}
           role="presentation"

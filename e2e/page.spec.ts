@@ -20,5 +20,7 @@ test("should display hover tips over highlights", async ({ page }) => {
   await waitForHighlights(page);
   await page.hover(".Highlight .Highlight__part");
   await page.waitForSelector("#PdfHighlighter__tip-container");
-  await expect(page.getByText("🔥 Flow or TypeScript?")).toBeVisible();
+  const popup = page.locator(".Highlight__popupBody");
+  await expect(popup.getByText("Flow or TypeScript?")).toBeVisible();
+  await expect(popup.locator(".Highlight__popupEmoji")).toHaveText("🔥");
 });
