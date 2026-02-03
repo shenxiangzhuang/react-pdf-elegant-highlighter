@@ -38,7 +38,7 @@ export interface PersistentPdfHighlighterProps<T_HT extends IHighlight>
     transformSelection: () => void,
     setSelectionColor: (color: string) => void,
     helpers: HighlightHelpers<T_HT>,
-  ) => JSX.Element | null;
+  ) => React.ReactElement | null;
   generateId?: () => string;
   createHighlight?: (highlight: NewHighlight, id: string) => T_HT;
   onHighlightsChange?: (highlights: Array<T_HT>) => void;

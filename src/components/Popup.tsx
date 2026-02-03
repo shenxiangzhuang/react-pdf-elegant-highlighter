@@ -2,11 +2,17 @@ import React, { useMemo, useState } from "react";
 import { MouseMonitor } from "./MouseMonitor";
 
 interface Props {
-  onMouseOver: (content: JSX.Element) => void;
-  popupContent: JSX.Element;
+  onMouseOver: (content: React.ReactElement) => void;
+  popupContent: React.ReactElement;
   onMouseOut: () => void;
-  children: JSX.Element;
+  children: React.ReactElement;
 }
+
+type PopupContentProps = {
+  onRequestLock?: () => void;
+  onRequestUnlock?: () => void;
+  isLocked?: boolean;
+};
 
 export function Popup({
   onMouseOver,
@@ -18,10 +24,10 @@ export function Popup({
   const [isLocked, setIsLocked] = useState(false);
 
   const popupWithControls = useMemo(() => {
-    if (!React.isValidElement(popupContent)) {
+    if (!React.isValidElement<PopupContentProps>(popupContent)) {
       return popupContent;
     }
-    return React.cloneElement(popupContent, {
+    return React.cloneElement<PopupContentProps>(popupContent, {
       onRequestLock: () => setIsLocked(true),
       onRequestUnlock: () => setIsLocked(false),
       isLocked,

@@ -44,10 +44,10 @@ interface State<T_HT> {
   range: Range | null;
   tip: {
     highlight: T_ViewportHighlight<T_HT>;
-    callback: (highlight: T_ViewportHighlight<T_HT>) => JSX.Element;
+    callback: (highlight: T_ViewportHighlight<T_HT>) => React.ReactElement;
   } | null;
   tipPosition: Position | null;
-  tipChildren: JSX.Element | null;
+  tipChildren: React.ReactElement | null;
   isAreaSelectionInProgress: boolean;
   scrolledToHighlightId: string;
 }
@@ -58,13 +58,13 @@ export interface PdfHighlighterProps<T_HT> {
     index: number,
     setTip: (
       highlight: T_ViewportHighlight<T_HT>,
-      callback: (highlight: T_ViewportHighlight<T_HT>) => JSX.Element,
+      callback: (highlight: T_ViewportHighlight<T_HT>) => React.ReactElement,
     ) => void,
     hideTip: () => void,
     viewportToScaled: (rect: LTWHP) => Scaled,
     screenshot: (position: LTWH) => string,
     isScrolledTo: boolean,
-  ) => JSX.Element;
+  ) => React.ReactElement;
   highlights: Array<T_HT>;
   onScrollChange: () => void;
   scrollRef: (scrollTo: (highlight: T_HT) => void) => void;
@@ -76,7 +76,7 @@ export interface PdfHighlighterProps<T_HT> {
     hideTipAndSelection: () => void,
     transformSelection: () => void,
     setSelectionColor: (color: string) => void,
-  ) => JSX.Element | null;
+  ) => React.ReactElement | null;
   enableAreaSelection: (event: MouseEvent) => boolean;
   pdfViewerOptions?: PDFViewerOptions;
 }
@@ -106,7 +106,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
   resizeObserver: ResizeObserver | null = null;
   containerNode?: HTMLDivElement | null = null;
-  containerNodeRef: RefObject<HTMLDivElement>;
+  containerNodeRef: RefObject<HTMLDivElement | null>;
   highlightRoots: {
     [page: number]: { reactRoot: Root; container: Element };
   } = {};
@@ -274,7 +274,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     return groupedHighlights;
   }
 
-  showTip(highlight: T_ViewportHighlight<T_HT>, content: JSX.Element) {
+  showTip(highlight: T_ViewportHighlight<T_HT>, content: React.ReactElement) {
     const { isCollapsed, ghostHighlight, isAreaSelectionInProgress } =
       this.state;
 
@@ -353,7 +353,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     }, this.renderHighlightLayers);
   };
 
-  setTip(position: Position, inner: JSX.Element | null) {
+  setTip(position: Position, inner: React.ReactElement | null) {
     this.setState({
       tipPosition: position,
       tipChildren: inner,

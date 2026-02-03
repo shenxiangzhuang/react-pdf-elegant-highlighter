@@ -2,8 +2,13 @@ import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import styles from "../style/TipContainer.module.css";
 import type { LTWHP } from "../types";
 
+type TipChildProps = {
+  onUpdate?: () => void;
+  popup?: { position: "below" | "above" };
+};
+
 interface Props {
-  children: JSX.Element | null;
+  children: React.ReactElement | null;
   style: { top: number; left: number; bottom: number };
   pageBoundingRect: LTWHP;
   pageOffsetTop: number;
@@ -72,16 +77,17 @@ export function TipContainer({
     });
   }, [updatePosition]);
 
-  const childrenWithProps = React.Children.map(children, (child) =>
-    child != null
-      ? React.cloneElement(child, {
-          onUpdate: handleUpdate,
-          popup: {
-            position: shouldPlaceBelow ? "below" : "above",
-          },
-        })
-      : null,
-  );
+  const childrenWithProps = React.Children.map(children, (child) => {
+    if (!React.isValidElement<TipChildProps>(child)) {
+      return child;
+    }
+    return React.cloneElement<TipChildProps>(child, {
+      onUpdate: handleUpdate,
+      popup: {
+        position: shouldPlaceBelow ? "below" : "above",
+      },
+    });
+  });
 
   return (
     <div

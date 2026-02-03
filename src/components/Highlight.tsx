@@ -1,5 +1,5 @@
 import styles from "../style/Highlight.module.css";
-import type { LTWHP } from "../types.js";
+import type { Comment, LTWHP } from "../types.js";
 
 interface Props {
   position: {
@@ -9,10 +9,7 @@ interface Props {
   onClick?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
-  comment: {
-    emoji: string;
-    text: string;
-  };
+  comment: Comment;
   isScrolledTo: boolean;
 }
 
